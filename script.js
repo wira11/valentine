@@ -77,18 +77,28 @@ function moveNoButton() {
     const btnWidth = noBtn.offsetWidth;
     const btnHeight = noBtn.offsetHeight;
     
-    // Calculate safe boundaries (with padding)
-    const padding = 20;
+    // Calculate safe boundaries (with larger padding to prevent edge issues)
+    const padding = 40; // Increased padding for safety
     const maxX = viewportWidth - btnWidth - padding;
     const maxY = viewportHeight - btnHeight - padding;
     
-    // Generate random position
-    let randomX = Math.random() * maxX;
-    let randomY = Math.random() * maxY;
+    // Ensure we have valid boundaries
+    if (maxX < padding || maxY < padding) {
+        // Viewport too small, just center it
+        noBtn.style.position = 'fixed';
+        noBtn.style.left = '50%';
+        noBtn.style.top = '50%';
+        noBtn.style.transform = 'translate(-50%, -50%)';
+        return;
+    }
+    
+    // Generate random position within safe boundaries
+    let randomX = padding + Math.random() * (maxX - padding);
+    let randomY = padding + Math.random() * (maxY - padding);
     
     // Ensure minimum distance from current position
     const currentRect = noBtn.getBoundingClientRect();
-    const minDistance = 150;
+    const minDistance = Math.min(150, viewportWidth * 0.25); // Adaptive minimum distance
     
     let attempts = 0;
     while (attempts < 10) {
@@ -101,18 +111,24 @@ function moveNoButton() {
             break;
         }
         
-        randomX = Math.random() * maxX;
-        randomY = Math.random() * maxY;
+        randomX = padding + Math.random() * (maxX - padding);
+        randomY = padding + Math.random() * (maxY - padding);
         attempts++;
     }
     
-    // Apply transform
+    // Clamp values to ensure they're within bounds
+    randomX = Math.max(padding, Math.min(randomX, maxX));
+    randomY = Math.max(padding, Math.min(randomY, maxY));
+    
+    // Apply position
     noBtn.style.position = 'fixed';
     noBtn.style.left = randomX + 'px';
     noBtn.style.top = randomY + 'px';
     
-    // Add random rotation for fun
-    const randomRotation = (Math.random() - 0.5) * 30;
+    // Add random rotation for fun (smaller on mobile)
+    const isMobile = viewportWidth < 600;
+    const maxRotation = isMobile ? 15 : 30;
+    const randomRotation = (Math.random() - 0.5) * maxRotation;
     noBtn.style.transform = `rotate(${randomRotation}deg) scale(${0.95 + Math.random() * 0.1})`;
     
     // Update playful message
