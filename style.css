@@ -288,6 +288,8 @@ html {
     background: linear-gradient(135deg, #ff4d6d, #ff8fa3);
     color: white;
     box-shadow: 0 4px 15px rgba(255, 77, 109, 0.5);
+    position: relative;
+    z-index: 1;
 }
 
 .btn-yes:hover {
@@ -306,10 +308,13 @@ html {
     color: #b5179e;
     transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     will-change: transform;
+    position: relative;
+    z-index: 1;
 }
 
 .btn-no.escaped {
     position: fixed !important;
+    z-index: 100;
 }
 
 .btn-no:hover {
