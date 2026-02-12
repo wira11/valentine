@@ -69,11 +69,11 @@ setInterval(createFloatingHeart, 800);
 // ========================================
 
 function moveNoButton() {
-    // Get viewport dimensions
+    // Get ACTUAL visible viewport dimensions
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     
-    // Get body padding/margin
+    // Get body padding
     const bodyStyle = window.getComputedStyle(document.body);
     const bodyPaddingLeft = parseFloat(bodyStyle.paddingLeft) || 0;
     const bodyPaddingRight = parseFloat(bodyStyle.paddingRight) || 0;
@@ -84,29 +84,33 @@ function moveNoButton() {
     const btnWidth = noBtn.offsetWidth;
     const btnHeight = noBtn.offsetHeight;
     
-    // Safety margin to prevent any edge overflow (larger safety margin)
-    const safetyMargin = 50;
+    // AGGRESSIVE safety margin - 80px from all edges
+    const safetyMargin = 80;
     
-    // Calculate STRICT boundaries - button must be fully visible
+    // Calculate ULTRA STRICT boundaries
     const minX = bodyPaddingLeft + safetyMargin;
     const minY = bodyPaddingTop + safetyMargin;
+    
+    // MAX Y is the critical one - be VERY conservative
+    // Use 70% of viewport height to be absolutely safe
+    const safeViewportHeight = viewportHeight * 0.7;
     const maxX = viewportWidth - btnWidth - bodyPaddingRight - safetyMargin;
-    const maxY = viewportHeight - btnHeight - bodyPaddingBottom - safetyMargin;
+    const maxY = safeViewportHeight - btnHeight - safetyMargin;
     
-    // Debug log (you can remove this later)
+    console.log('=== BUTTON MOVE DEBUG ===');
     console.log('Viewport:', viewportWidth, 'x', viewportHeight);
-    console.log('Button:', btnWidth, 'x', btnHeight);
-    console.log('Boundaries - X:', minX, 'to', maxX, '| Y:', minY, 'to', maxY);
+    console.log('Button size:', btnWidth, 'x', btnHeight);
+    console.log('Safe viewport height:', safeViewportHeight);
+    console.log('Y Range:', minY, 'to', maxY);
+    console.log('Max bottom edge allowed:', maxY + btnHeight);
     
-    // Ensure we have valid boundaries
+    // If boundaries are too tight, just center it
     if (maxX <= minX || maxY <= minY) {
-        // Viewport too small, center it
         noBtn.classList.add('escaped');
         noBtn.style.position = 'fixed';
         noBtn.style.left = '50%';
-        noBtn.style.top = '50%';
+        noBtn.style.top = '40%'; // Keep in upper half
         noBtn.style.transform = 'translate(-50%, -50%)';
-        
         updatePlayfulMessage();
         return;
     }
@@ -116,83 +120,75 @@ function moveNoButton() {
     const currentCenterX = currentRect.left + btnWidth / 2;
     const currentCenterY = currentRect.top + btnHeight / 2;
     
-    // Calculate minimum distance
-    const minDistance = Math.min(100, Math.min(viewportWidth, viewportHeight) * 0.15);
+    // Minimum distance
+    const minDistance = 100;
     
-    // Try to find a good position
+    // Find valid position
     let randomX, randomY;
     let attempts = 0;
     let validPosition = false;
     
-    while (attempts < 30 && !validPosition) {
-        // Generate random position STRICTLY within bounds
+    while (attempts < 50 && !validPosition) {
+        // Generate position in SAFE zone only
         randomX = minX + Math.random() * (maxX - minX);
         randomY = minY + Math.random() * (maxY - minY);
         
-        // Calculate center of new position
+        // Calculate distance
         const newCenterX = randomX + btnWidth / 2;
         const newCenterY = randomY + btnHeight / 2;
-        
-        // Check distance from current position
         const distance = Math.sqrt(
             Math.pow(newCenterX - currentCenterX, 2) + 
             Math.pow(newCenterY - currentCenterY, 2)
         );
         
-        // Verify position is ABSOLUTELY within bounds
-        const withinBounds = 
+        // CRITICAL: Check bottom edge won't exceed safe zone
+        const bottomEdge = randomY + btnHeight;
+        const isFullyVisible = 
             randomX >= minX &&
             randomY >= minY &&
-            randomX <= maxX &&
-            randomY <= maxY &&
-            (randomX + btnWidth) <= (viewportWidth - bodyPaddingRight - safetyMargin) &&
-            (randomY + btnHeight) <= (viewportHeight - bodyPaddingBottom - safetyMargin);
+            randomX + btnWidth <= maxX + btnWidth &&
+            bottomEdge <= safeViewportHeight - safetyMargin;
         
-        if (distance >= minDistance && withinBounds) {
+        if (distance >= minDistance && isFullyVisible) {
             validPosition = true;
         }
         
         attempts++;
     }
     
-    // If no valid position found, use safe center-based position
+    // Fallback: use ultra-safe center position
     if (!validPosition) {
-        const centerX = viewportWidth / 2;
-        const centerY = viewportHeight / 2;
-        const offsetRange = Math.min(viewportWidth, viewportHeight) * 0.2;
-        
-        randomX = centerX - btnWidth / 2 + (Math.random() - 0.5) * offsetRange;
-        randomY = centerY - btnHeight / 2 + (Math.random() - 0.5) * offsetRange;
+        randomX = viewportWidth / 2 - btnWidth / 2;
+        randomY = viewportHeight / 3 - btnHeight / 2; // Upper third only
     }
     
-    // CRITICAL: Final strict clamp to guarantee visibility
+    // TRIPLE CHECK: Force clamp to safe zone
     randomX = Math.max(minX, Math.min(randomX, maxX));
     randomY = Math.max(minY, Math.min(randomY, maxY));
     
-    // Double check - absolutely ensure button won't overflow
-    if (randomX + btnWidth > viewportWidth - bodyPaddingRight - safetyMargin) {
-        randomX = viewportWidth - btnWidth - bodyPaddingRight - safetyMargin;
-    }
-    if (randomY + btnHeight > viewportHeight - bodyPaddingBottom - safetyMargin) {
-        randomY = viewportHeight - btnHeight - bodyPaddingBottom - safetyMargin;
+    // FINAL VERIFICATION: Check bottom edge
+    if (randomY + btnHeight > safeViewportHeight - safetyMargin) {
+        randomY = safeViewportHeight - btnHeight - safetyMargin;
     }
     
-    // Debug final position
-    console.log('Final position - X:', randomX, '| Y:', randomY);
-    console.log('Bottom edge will be at:', randomY + btnHeight, '(viewport height:', viewportHeight, ')');
+    // Ensure Y never exceeds 60% of viewport
+    const maxAllowedY = viewportHeight * 0.6;
+    if (randomY > maxAllowedY) {
+        randomY = maxAllowedY;
+    }
+    
+    console.log('Final X:', randomX);
+    console.log('Final Y:', randomY);
+    console.log('Final bottom edge:', randomY + btnHeight);
+    console.log('========================');
     
     // Apply position
     noBtn.classList.add('escaped');
     noBtn.style.position = 'fixed';
     noBtn.style.left = Math.round(randomX) + 'px';
     noBtn.style.top = Math.round(randomY) + 'px';
+    noBtn.style.transform = 'none'; // NO transform to avoid any overflow
     
-    // Minimal transform to avoid overflow
-    const randomRotation = (Math.random() - 0.5) * 10; // Very small rotation
-    const randomScale = 0.99 + Math.random() * 0.02; // Minimal scale
-    noBtn.style.transform = `rotate(${randomRotation}deg) scale(${randomScale})`;
-    
-    // Update playful message
     updatePlayfulMessage();
 }
 
