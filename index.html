@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A romantic Valentine's Day interactive experience">
+    <title>Valentine Blossoming Flower 🌸</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Floating Hearts Background -->
+    <div class="hearts-background" id="heartsBackground"></div>
+    
+    <!-- Initial Question Card -->
+    <div class="card-container" id="cardContainer">
+        <div class="question-card">
+            <!-- Playful message that changes when No button is escaped -->
+            <p class="playful-message" id="playfulMessage"></p>
+            
+            <!-- Main question -->
+            <h1 class="question">💌 Will you be my Valentine?</h1>
+            
+            <!-- Button container -->
+            <div class="button-container">
+                <button class="btn btn-yes" id="yesBtn">
+                    <span>🌹 Yes</span>
+                </button>
+                <button class="btn btn-no" id="noBtn">
+                    <span>💔 No</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Celebration Scene (Hidden Initially) -->
+    <div class="celebration-container" id="celebrationContainer">
+        <!-- Flower Animation -->
+        <div class="flower-container" id="flowerContainer">
+            <svg class="flower" id="flower" viewBox="0 0 200 300">
+                <!-- Stem -->
+                <path class="stem" d="M 100 300 L 100 150" stroke="#2d5016" stroke-width="4" fill="none"/>
+                
+                <!-- Leaves -->
+                <path class="leaf leaf-left" d="M 100 200 Q 70 200 60 220 Q 70 210 100 210 Z" fill="#4a7c1c"/>
+                <path class="leaf leaf-right" d="M 100 180 Q 130 180 140 200 Q 130 190 100 190 Z" fill="#4a7c1c"/>
+                
+                <!-- Center Circle -->
+                <circle class="flower-center" cx="100" cy="100" r="20" fill="#ffd700"/>
+                
+                <!-- Petals (8 petals) -->
+                <ellipse class="petal petal-1" cx="100" cy="60" rx="20" ry="35" fill="#ff4d6d"/>
+                <ellipse class="petal petal-2" cx="128" cy="72" rx="20" ry="35" fill="#ff8fa3" transform="rotate(45 100 100)"/>
+                <ellipse class="petal petal-3" cx="140" cy="100" rx="20" ry="35" fill="#ff4d6d" transform="rotate(90 100 100)"/>
+                <ellipse class="petal petal-4" cx="128" cy="128" rx="20" ry="35" fill="#ff8fa3" transform="rotate(135 100 100)"/>
+                <ellipse class="petal petal-5" cx="100" cy="140" rx="20" ry="35" fill="#ff4d6d" transform="rotate(180 100 100)"/>
+                <ellipse class="petal petal-6" cx="72" cy="128" rx="20" ry="35" fill="#ff8fa3" transform="rotate(225 100 100)"/>
+                <ellipse class="petal petal-7" cx="60" cy="100" rx="20" ry="35" fill="#ff4d6d" transform="rotate(270 100 100)"/>
+                <ellipse class="petal petal-8" cx="72" cy="72" rx="20" ry="35" fill="#ff8fa3" transform="rotate(315 100 100)"/>
+            </svg>
+        </div>
+        
+        <!-- Canvas for Confetti -->
+        <canvas id="confettiCanvas"></canvas>
+        
+        <!-- Final Message -->
+        <div class="final-message" id="finalMessage">
+            <h2 class="message-main">Yay! You just made my world bloom 🌸❤️</h2>
+            <p class="message-sub">Happy Valentine's Day, My Love.</p>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
