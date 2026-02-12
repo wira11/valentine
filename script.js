@@ -73,17 +73,25 @@ function moveNoButton() {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     
+    // Get body padding/margin
+    const bodyStyle = window.getComputedStyle(document.body);
+    const bodyPaddingLeft = parseFloat(bodyStyle.paddingLeft) || 0;
+    const bodyPaddingRight = parseFloat(bodyStyle.paddingRight) || 0;
+    const bodyPaddingTop = parseFloat(bodyStyle.paddingTop) || 0;
+    const bodyPaddingBottom = parseFloat(bodyStyle.paddingBottom) || 0;
+    
     // Get button dimensions
     const btnWidth = noBtn.offsetWidth;
     const btnHeight = noBtn.offsetHeight;
     
-    // Calculate safe boundaries (with larger padding to prevent edge issues)
-    const padding = 40; // Increased padding for safety
-    const maxX = viewportWidth - btnWidth - padding;
-    const maxY = viewportHeight - btnHeight - padding;
+    // Calculate safe boundaries (respecting body padding)
+    const minX = bodyPaddingLeft;
+    const minY = bodyPaddingTop;
+    const maxX = viewportWidth - btnWidth - bodyPaddingRight;
+    const maxY = viewportHeight - btnHeight - bodyPaddingBottom;
     
     // Ensure we have valid boundaries
-    if (maxX < padding || maxY < padding) {
+    if (maxX < minX || maxY < minY) {
         // Viewport too small, just center it
         noBtn.style.position = 'fixed';
         noBtn.style.left = '50%';
@@ -93,8 +101,8 @@ function moveNoButton() {
     }
     
     // Generate random position within safe boundaries
-    let randomX = padding + Math.random() * (maxX - padding);
-    let randomY = padding + Math.random() * (maxY - padding);
+    let randomX = minX + Math.random() * (maxX - minX);
+    let randomY = minY + Math.random() * (maxY - minY);
     
     // Ensure minimum distance from current position
     const currentRect = noBtn.getBoundingClientRect();
@@ -111,14 +119,14 @@ function moveNoButton() {
             break;
         }
         
-        randomX = padding + Math.random() * (maxX - padding);
-        randomY = padding + Math.random() * (maxY - padding);
+        randomX = minX + Math.random() * (maxX - minX);
+        randomY = minY + Math.random() * (maxY - minY);
         attempts++;
     }
     
     // Clamp values to ensure they're within bounds
-    randomX = Math.max(padding, Math.min(randomX, maxX));
-    randomY = Math.max(padding, Math.min(randomY, maxY));
+    randomX = Math.max(minX, Math.min(randomX, maxX));
+    randomY = Math.max(minY, Math.min(randomY, maxY));
     
     // Apply position and add escaped class
     noBtn.classList.add('escaped');

@@ -23,6 +23,19 @@ body {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
+    padding: 30px;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 400px) {
+    body {
+        padding: 15px;
+    }
 }
 
 html {
