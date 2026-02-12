@@ -218,7 +218,8 @@ html {
     justify-content: center;
     align-items: center;
     position: relative;
-    min-height: 60px;
+    min-height: 80px;
+    width: 100%;
 }
 
 @media (max-width: 600px) {
@@ -252,9 +253,10 @@ html {
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    position: relative;
     overflow: hidden;
     touch-action: manipulation;
+    display: inline-block;
+    position: static;
 }
 
 @media (max-width: 600px) {
@@ -321,13 +323,20 @@ html {
     color: #b5179e;
     transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     will-change: transform;
-    position: relative;
+    position: static;
     z-index: 1;
+    transform-origin: center center;
+    display: inline-block;
 }
 
 .btn-no.escaped {
     position: fixed !important;
     z-index: 100;
+    /* Ensure button stays within viewport */
+    max-width: calc(100vw - 80px);
+    max-height: calc(100vh - 80px);
+}
+    max-height: calc(100vh - 80px);
 }
 
 .btn-no:hover {

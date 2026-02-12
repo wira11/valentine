@@ -80,73 +80,128 @@ function moveNoButton() {
     const bodyPaddingTop = parseFloat(bodyStyle.paddingTop) || 0;
     const bodyPaddingBottom = parseFloat(bodyStyle.paddingBottom) || 0;
     
-    // Get button dimensions
+    // Get button actual dimensions
     const btnWidth = noBtn.offsetWidth;
     const btnHeight = noBtn.offsetHeight;
     
-    // Calculate safe boundaries (respecting body padding)
-    const minX = bodyPaddingLeft;
-    const minY = bodyPaddingTop;
-    const maxX = viewportWidth - btnWidth - bodyPaddingRight;
-    const maxY = viewportHeight - btnHeight - bodyPaddingBottom;
+    // Safety margin to prevent any edge overflow (larger safety margin)
+    const safetyMargin = 50;
+    
+    // Calculate STRICT boundaries - button must be fully visible
+    const minX = bodyPaddingLeft + safetyMargin;
+    const minY = bodyPaddingTop + safetyMargin;
+    const maxX = viewportWidth - btnWidth - bodyPaddingRight - safetyMargin;
+    const maxY = viewportHeight - btnHeight - bodyPaddingBottom - safetyMargin;
+    
+    // Debug log (you can remove this later)
+    console.log('Viewport:', viewportWidth, 'x', viewportHeight);
+    console.log('Button:', btnWidth, 'x', btnHeight);
+    console.log('Boundaries - X:', minX, 'to', maxX, '| Y:', minY, 'to', maxY);
     
     // Ensure we have valid boundaries
-    if (maxX < minX || maxY < minY) {
-        // Viewport too small, just center it
+    if (maxX <= minX || maxY <= minY) {
+        // Viewport too small, center it
+        noBtn.classList.add('escaped');
         noBtn.style.position = 'fixed';
         noBtn.style.left = '50%';
         noBtn.style.top = '50%';
         noBtn.style.transform = 'translate(-50%, -50%)';
+        
+        updatePlayfulMessage();
         return;
     }
     
-    // Generate random position within safe boundaries
-    let randomX = minX + Math.random() * (maxX - minX);
-    let randomY = minY + Math.random() * (maxY - minY);
-    
-    // Ensure minimum distance from current position
+    // Get current position
     const currentRect = noBtn.getBoundingClientRect();
-    const minDistance = Math.min(150, viewportWidth * 0.25); // Adaptive minimum distance
+    const currentCenterX = currentRect.left + btnWidth / 2;
+    const currentCenterY = currentRect.top + btnHeight / 2;
     
+    // Calculate minimum distance
+    const minDistance = Math.min(100, Math.min(viewportWidth, viewportHeight) * 0.15);
+    
+    // Try to find a good position
+    let randomX, randomY;
     let attempts = 0;
-    while (attempts < 10) {
-        const distance = Math.sqrt(
-            Math.pow(randomX - currentRect.left, 2) + 
-            Math.pow(randomY - currentRect.top, 2)
-        );
-        
-        if (distance > minDistance) {
-            break;
-        }
-        
+    let validPosition = false;
+    
+    while (attempts < 30 && !validPosition) {
+        // Generate random position STRICTLY within bounds
         randomX = minX + Math.random() * (maxX - minX);
         randomY = minY + Math.random() * (maxY - minY);
+        
+        // Calculate center of new position
+        const newCenterX = randomX + btnWidth / 2;
+        const newCenterY = randomY + btnHeight / 2;
+        
+        // Check distance from current position
+        const distance = Math.sqrt(
+            Math.pow(newCenterX - currentCenterX, 2) + 
+            Math.pow(newCenterY - currentCenterY, 2)
+        );
+        
+        // Verify position is ABSOLUTELY within bounds
+        const withinBounds = 
+            randomX >= minX &&
+            randomY >= minY &&
+            randomX <= maxX &&
+            randomY <= maxY &&
+            (randomX + btnWidth) <= (viewportWidth - bodyPaddingRight - safetyMargin) &&
+            (randomY + btnHeight) <= (viewportHeight - bodyPaddingBottom - safetyMargin);
+        
+        if (distance >= minDistance && withinBounds) {
+            validPosition = true;
+        }
+        
         attempts++;
     }
     
-    // Clamp values to ensure they're within bounds
+    // If no valid position found, use safe center-based position
+    if (!validPosition) {
+        const centerX = viewportWidth / 2;
+        const centerY = viewportHeight / 2;
+        const offsetRange = Math.min(viewportWidth, viewportHeight) * 0.2;
+        
+        randomX = centerX - btnWidth / 2 + (Math.random() - 0.5) * offsetRange;
+        randomY = centerY - btnHeight / 2 + (Math.random() - 0.5) * offsetRange;
+    }
+    
+    // CRITICAL: Final strict clamp to guarantee visibility
     randomX = Math.max(minX, Math.min(randomX, maxX));
     randomY = Math.max(minY, Math.min(randomY, maxY));
     
-    // Apply position and add escaped class
+    // Double check - absolutely ensure button won't overflow
+    if (randomX + btnWidth > viewportWidth - bodyPaddingRight - safetyMargin) {
+        randomX = viewportWidth - btnWidth - bodyPaddingRight - safetyMargin;
+    }
+    if (randomY + btnHeight > viewportHeight - bodyPaddingBottom - safetyMargin) {
+        randomY = viewportHeight - btnHeight - bodyPaddingBottom - safetyMargin;
+    }
+    
+    // Debug final position
+    console.log('Final position - X:', randomX, '| Y:', randomY);
+    console.log('Bottom edge will be at:', randomY + btnHeight, '(viewport height:', viewportHeight, ')');
+    
+    // Apply position
     noBtn.classList.add('escaped');
     noBtn.style.position = 'fixed';
-    noBtn.style.left = randomX + 'px';
-    noBtn.style.top = randomY + 'px';
+    noBtn.style.left = Math.round(randomX) + 'px';
+    noBtn.style.top = Math.round(randomY) + 'px';
     
-    // Add random rotation for fun (smaller on mobile)
-    const isMobile = viewportWidth < 600;
-    const maxRotation = isMobile ? 15 : 30;
-    const randomRotation = (Math.random() - 0.5) * maxRotation;
-    noBtn.style.transform = `rotate(${randomRotation}deg) scale(${0.95 + Math.random() * 0.1})`;
+    // Minimal transform to avoid overflow
+    const randomRotation = (Math.random() - 0.5) * 10; // Very small rotation
+    const randomScale = 0.99 + Math.random() * 0.02; // Minimal scale
+    noBtn.style.transform = `rotate(${randomRotation}deg) scale(${randomScale})`;
     
     // Update playful message
+    updatePlayfulMessage();
+}
+
+function updatePlayfulMessage() {
     playfulMessage.textContent = playfulMessages[messageIndex % playfulMessages.length];
     playfulMessage.style.animation = 'none';
     setTimeout(() => {
         playfulMessage.style.animation = 'bounce 0.5s ease';
     }, 10);
-    
     messageIndex++;
 }
 
@@ -436,6 +491,36 @@ document.body.style.overflow = 'hidden';
 window.addEventListener('load', () => {
     // Ensure card fades in smoothly
     cardContainer.style.opacity = '1';
+    
+    // Display screen size info
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    console.log('%c📐 SCREEN INFO 📐', 'color: #ff4d6d; font-size: 16px; font-weight: bold;');
+    console.log(`Viewport: ${screenWidth} x ${screenHeight} pixels`);
+    console.log(`Screen: ${window.screen.width} x ${window.screen.height} pixels`);
+    console.log(`Device Pixel Ratio: ${window.devicePixelRatio}`);
+    
+    // Show on screen temporarily
+    const sizeDisplay = document.createElement('div');
+    sizeDisplay.style.cssText = `
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 14px;
+        z-index: 9999;
+        font-family: monospace;
+    `;
+    sizeDisplay.innerHTML = `Viewport: ${screenWidth} x ${screenHeight}`;
+    document.body.appendChild(sizeDisplay);
+    
+    // Remove after 5 seconds
+    setTimeout(() => {
+        sizeDisplay.remove();
+    }, 5000);
 });
 
 // ========================================
