@@ -214,6 +214,59 @@ noBtn.addEventListener('click', (e) => {
     moveNoButton();
 });
 
+// CRITICAL: Handle window resize - reposition button if it's outside viewport
+window.addEventListener('resize', () => {
+    // Only adjust if button has already escaped
+    if (noBtn.classList.contains('escaped')) {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const btnWidth = noBtn.offsetWidth;
+        const btnHeight = noBtn.offsetHeight;
+        
+        const currentLeft = parseInt(noBtn.style.left) || 0;
+        const currentTop = parseInt(noBtn.style.top) || 0;
+        
+        const safetyMargin = 80;
+        const maxAllowedX = viewportWidth - btnWidth - safetyMargin;
+        const maxAllowedY = viewportHeight * 0.6; // Max 60% viewport height
+        
+        let needsReposition = false;
+        let newLeft = currentLeft;
+        let newTop = currentTop;
+        
+        // Check if button is outside safe zone
+        if (currentLeft < safetyMargin) {
+            newLeft = safetyMargin;
+            needsReposition = true;
+        }
+        if (currentLeft > maxAllowedX) {
+            newLeft = maxAllowedX;
+            needsReposition = true;
+        }
+        if (currentTop < safetyMargin) {
+            newTop = safetyMargin;
+            needsReposition = true;
+        }
+        if (currentTop > maxAllowedY || (currentTop + btnHeight) > viewportHeight - safetyMargin) {
+            newTop = Math.min(maxAllowedY, viewportHeight - btnHeight - safetyMargin);
+            needsReposition = true;
+        }
+        
+        // Reposition if needed
+        if (needsReposition) {
+            noBtn.style.left = Math.round(newLeft) + 'px';
+            noBtn.style.top = Math.round(newTop) + 'px';
+            console.log('🔄 Button repositioned due to resize:', newLeft, newTop);
+        }
+    }
+});
+
+// Prevent clicking No button (it will move before click completes)
+noBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    moveNoButton();
+});
+
 // ========================================
 // YES BUTTON CELEBRATION
 // ========================================
