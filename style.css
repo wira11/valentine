@@ -205,12 +205,23 @@ html {
     justify-content: center;
     align-items: center;
     position: relative;
+    min-height: 60px;
 }
 
 @media (max-width: 600px) {
     .button-container {
-        flex-direction: column;
+        flex-direction: row;
         gap: 20px;
+        flex-wrap: wrap;
+        min-height: 70px;
+    }
+}
+
+@media (max-width: 400px) {
+    .button-container {
+        flex-direction: column;
+        gap: 15px;
+        min-height: 140px;
     }
 }
 
@@ -293,9 +304,12 @@ html {
 .btn-no {
     background: linear-gradient(135deg, #ffe5ec, #ffc2d1);
     color: #b5179e;
-    position: absolute;
     transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     will-change: transform;
+}
+
+.btn-no.escaped {
+    position: fixed !important;
 }
 
 .btn-no:hover {

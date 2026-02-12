@@ -120,7 +120,8 @@ function moveNoButton() {
     randomX = Math.max(padding, Math.min(randomX, maxX));
     randomY = Math.max(padding, Math.min(randomY, maxY));
     
-    // Apply position
+    // Apply position and add escaped class
+    noBtn.classList.add('escaped');
     noBtn.style.position = 'fixed';
     noBtn.style.left = randomX + 'px';
     noBtn.style.top = randomY + 'px';
